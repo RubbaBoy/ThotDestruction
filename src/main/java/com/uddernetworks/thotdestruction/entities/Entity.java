@@ -6,7 +6,7 @@ import com.uddernetworks.thotdestruction.main.Game;
 
 public abstract class Entity {
 
-    public int x, y;
+    protected int x, y;
     protected boolean alive = false;
     protected Game game;
 
@@ -32,4 +32,8 @@ public abstract class Entity {
     public abstract void render(Screen screen);
 
     public abstract void remove();
+
+    public abstract int getCenterX();
+
+    public abstract int getCenterY();
 }

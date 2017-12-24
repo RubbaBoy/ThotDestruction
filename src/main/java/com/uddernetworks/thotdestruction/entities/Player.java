@@ -1,6 +1,8 @@
 package com.uddernetworks.thotdestruction.entities;
 
+import com.uddernetworks.thotdestruction.entities.bullet.BasicBullet;
 import com.uddernetworks.thotdestruction.gfx.PlayerAnimations;
+import com.uddernetworks.thotdestruction.gfx.ThotAnimations;
 import com.uddernetworks.thotdestruction.main.Game;
 import com.uddernetworks.thotdestruction.weapons.Equipable;
 
@@ -16,7 +18,7 @@ public class Player extends Mob {
     private String[] currentAnimations = {"LEFT", "RIGHT", "BACKWARD", "FORWARD"};
 
     public Player(Game game, int xPos, int yPos) {
-        super(game, PlayerAnimations.FORWARD_STILL);
+        super(game, 20, 20, game.getAnimationSet(), PlayerAnimations.FORWARD_STILL);
         this.game = game;
 
         centerX = xPos - (pixels.length / 4) * 2;
@@ -25,19 +27,22 @@ public class Player extends Mob {
         setInitialPosition(centerX, centerY);
     }
 
-    private int tickCount = 0;
-
     public void setCurrentAnimations(String[] currentAnimations) {
         this.currentAnimations = currentAnimations;
 
         refreshAnimations(currentAnimations);
     }
 
+    public void click(int xx, int yy) {
+        if (game.getInputHandler().shift.isPressed() && equipped != null) {
+            BasicBullet bullet = new BasicBullet(game, Math.abs(xExact) + (pixels.length / 2), Math.abs(yExact) + (pixels[0].length / 2), xx + Math.abs(game.getScreen().getXOffset()), yy + Math.abs(game.getScreen().getYOffset()));
+            game.getBulletManager().addBullet(bullet);
+        }
+    }
+
     @Override
     public void tick() {
         if (!alive) return;
-
-        tickCount++;
 
         int oldX = x;
         int oldY = y;
@@ -83,7 +88,7 @@ public class Player extends Mob {
 
         game.getScreen().backupOffsets();
 
-        if (x == centerX) {
+        if (isWithin(x, centerX, speed)) {
             if (!game.getScreen().setXOffset(game.getScreen().xOffset - movedX)) {
                 x += movedX;
             }
@@ -91,7 +96,7 @@ public class Player extends Mob {
             x += movedX;
         }
 
-        if (y == centerY) {
+        if (isWithin(y, centerY, speed)) {
             if (!game.getScreen().setYOffset(game.getScreen().yOffset - movedY)) {
                 y += movedY;
             }
@@ -100,7 +105,7 @@ public class Player extends Mob {
         }
 
 
-        if (hasCollided(oldX, oldY, x, y)) {
+        if (hasCollided(x, y)) {
             x = oldX;
             y = oldY;
             game.getScreen().restoreOffsets();
@@ -132,7 +137,15 @@ public class Player extends Mob {
 
         pickupCheck();
 
+        this.xExact = game.getScreen().getXOffset() - x;
+        this.yExact = game.getScreen().getYOffset() - y;
+
         super.tick();
+    }
+
+    private static boolean isWithin(int num1, int num2, int range) {
+        int diff = Math.abs(num1 - num2);
+        return diff <= range;
     }
 
     private void pickupCheck() {
@@ -149,43 +162,6 @@ public class Player extends Mob {
 
 
         pickup.remove();
-    }
-
-
-    private boolean hasCollided(int oldX, int oldY, int newX, int newY) {
-        int xMin = current.getBound_minX();
-        int xMax = current.getBound_maxX();
-
-        int yMin = current.getBound_minY();
-        int yMax = current.getBound_maxY();
-
-
-        for (int x = xMin; x < xMax; x++) {
-            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, oldX, oldY, x + oldX, newY + yMin)) {
-                return true;
-            }
-        }
-
-        for (int x = xMin; x < xMax; x++) {
-            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, oldX, oldY, x + oldX, newY + yMax)) {
-                return true;
-            }
-        }
-
-
-        for (int y = yMin; y < yMax; y++) {
-            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, oldX, oldY, newX + xMin, y + newY)) {
-                return true;
-            }
-        }
-
-        for (int y = yMin; y < yMax; y++) {
-            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, oldX, oldY, newX + xMax, y + newY)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     public void setSpeed(int speed) {

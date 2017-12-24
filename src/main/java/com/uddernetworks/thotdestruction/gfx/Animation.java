@@ -14,7 +14,13 @@ public class Animation {
     private int bound_minY;
     private int bound_maxY;
 
+    private boolean flip;
+
     public Animation(int gridX, int gridY, int width, int height, int bound_minX, int bound_maxX, int bound_minY, int bound_maxY) {
+        this(gridX, gridY, width, height, bound_minX, bound_maxX, bound_minY, bound_maxY, false);
+    }
+
+    public Animation(int gridX, int gridY, int width, int height, int bound_minX, int bound_maxX, int bound_minY, int bound_maxY, boolean flip) {
         this.gridX = gridX;
         this.gridY = gridY;
         this.width = width;
@@ -23,10 +29,11 @@ public class Animation {
         this.bound_maxX = bound_maxX;
         this.bound_minY = bound_minY;
         this.bound_maxY = bound_maxY;
+        this.flip = flip;
     }
 
     public void populateData(SpriteSheet spriteSheet) {
-        pixels = spriteSheet.getSub(gridX, gridY, width, height);
+        pixels = spriteSheet.getSub(gridX, gridY, width, height, flip);
     }
 
     public int getBound_minX() {

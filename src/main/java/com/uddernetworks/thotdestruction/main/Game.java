@@ -4,11 +4,11 @@ import com.uddernetworks.thotdestruction.entities.EntityManager;
 import com.uddernetworks.thotdestruction.entities.EntityTextureManager;
 import com.uddernetworks.thotdestruction.entities.Player;
 import com.uddernetworks.thotdestruction.entities.ThotRiflePickup;
+import com.uddernetworks.thotdestruction.entities.bullet.BulletManager;
 import com.uddernetworks.thotdestruction.entities.thot.BasicThot;
 import com.uddernetworks.thotdestruction.gfx.*;
 import com.uddernetworks.thotdestruction.level.Level;
 import com.uddernetworks.thotdestruction.level.tile.TileUtils;
-import com.uddernetworks.thotdestruction.weapons.ThotRifle;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,13 +32,16 @@ public class Game extends Canvas implements Runnable {
     private SpriteSheet spriteSheet;
     private Screen screen;
     private InputHandler inputHandler;
+    private MouseHandler mouseHandler;
     private EntityManager entityManager;
     private FontManager fontManager;
     private ScopeRenderer scopeRenderer;
     private Player player;
     private Level level;
     private AnimationSet animationSet;
+    private AnimationSet thotAnimationSet;
     private EntityTextureManager entityTextureManager;
+    private BulletManager bulletManager;
 
     public Game() {
         setMinimumSize(new Dimension(WIDTH * SCALE, HEIGHT * SCALE));
@@ -56,6 +59,8 @@ public class Game extends Canvas implements Runnable {
         jFrame.setResizable(false);
         jFrame.setLocationRelativeTo(null);
         jFrame.setVisible(true);
+
+        jFrame.requestFocus();
     }
 
     public synchronized void start() {
@@ -74,6 +79,7 @@ public class Game extends Canvas implements Runnable {
     public void run() {
         long lastTime = System.nanoTime();
         double nsPerTick = 1000000000D / 60D;
+//        double nsPerTick = 1000000000D / 1200D;
 
         int ticks = 0;
         int frames = 0;
@@ -94,11 +100,14 @@ public class Game extends Canvas implements Runnable {
                 shouldRender = true;
             }
 
-//            try {
-//                Thread.sleep(2);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
+            /*
+            try {
+                Thread.sleep(2);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            */
+
             if (shouldRender) {
                 frames++;
                 render();
@@ -107,7 +116,7 @@ public class Game extends Canvas implements Runnable {
             if (System.currentTimeMillis() - lastTimer > 1000) {
                 lastTimer += 1000;
                 this.fps = frames;
-                System.out.println("TPS: " + ticks + "  FPS:" + frames);
+                System.out.println("TPS: " + ticks + "  FPS: " + frames);
                 frames = 0;
                 ticks = 0;
             }
@@ -118,21 +127,34 @@ public class Game extends Canvas implements Runnable {
         System.out.println("Game.init");
 
         inputHandler = new InputHandler(this);
+        mouseHandler = new MouseHandler(this);
         spriteSheet = new SpriteSheet("/spritesheet.png");
         TileUtils.loadAllTiles(spriteSheet);
 
-        animationSet = new AnimationSet(spriteSheet);
+        PlayerAnimations.populateValues(spriteSheet);
+        ThotAnimations.populateValues(spriteSheet);
+
+        bulletManager = new BulletManager(this);
+
+        animationSet = new AnimationSet();
 
         animationSet.addSet("LEFT", PlayerAnimations.LEFT_STILL, PlayerAnimations.LEFT_WALK_1, PlayerAnimations.LEFT_STILL, PlayerAnimations.LEFT_WALK_2, PlayerAnimations.LEFT_STILL);
         animationSet.addSet("RIGHT", PlayerAnimations.RIGHT_STILL, PlayerAnimations.RIGHT_WALK_1, PlayerAnimations.RIGHT_STILL, PlayerAnimations.RIGHT_WALK_2, PlayerAnimations.RIGHT_STILL);
-        animationSet.addSet("BACKWARD",PlayerAnimations.BACKWARD_STILL, PlayerAnimations.BACKWARD_WALK_1, PlayerAnimations.BACKWARD_STILL, PlayerAnimations.BACKWARD_WALK_2, PlayerAnimations.BACKWARD_STILL);
+        animationSet.addSet("BACKWARD", PlayerAnimations.BACKWARD_STILL, PlayerAnimations.BACKWARD_WALK_1, PlayerAnimations.BACKWARD_STILL, PlayerAnimations.BACKWARD_WALK_2, PlayerAnimations.BACKWARD_STILL);
         animationSet.addSet("FORWARD", PlayerAnimations.FORWARD_STILL, PlayerAnimations.FORWARD_WALK_1, PlayerAnimations.FORWARD_STILL, PlayerAnimations.FORWARD_WALK_2, PlayerAnimations.FORWARD_STILL);
 
 
         animationSet.addSet("RIFLE_LEFT", PlayerAnimations.RIFLE_LEFT_STILL, PlayerAnimations.RIFLE_LEFT_WALK_1, PlayerAnimations.RIFLE_LEFT_STILL, PlayerAnimations.RIFLE_LEFT_WALK_2, PlayerAnimations.RIFLE_LEFT_STILL);
         animationSet.addSet("RIFLE_RIGHT", PlayerAnimations.RIFLE_RIGHT_STILL, PlayerAnimations.RIFLE_RIGHT_WALK_1, PlayerAnimations.RIFLE_RIGHT_STILL, PlayerAnimations.RIFLE_RIGHT_WALK_2, PlayerAnimations.RIFLE_RIGHT_STILL);
-        animationSet.addSet("RIFLE_BACKWARD",PlayerAnimations.RIFLE_BACKWARD_STILL, PlayerAnimations.RIFLE_BACKWARD_WALK_1, PlayerAnimations.RIFLE_BACKWARD_STILL, PlayerAnimations.RIFLE_BACKWARD_WALK_2, PlayerAnimations.RIFLE_BACKWARD_STILL);
+        animationSet.addSet("RIFLE_BACKWARD", PlayerAnimations.RIFLE_BACKWARD_STILL, PlayerAnimations.RIFLE_BACKWARD_WALK_1, PlayerAnimations.RIFLE_BACKWARD_STILL, PlayerAnimations.RIFLE_BACKWARD_WALK_2, PlayerAnimations.RIFLE_BACKWARD_STILL);
         animationSet.addSet("RIFLE_FORWARD", PlayerAnimations.RIFLE_FORWARD_STILL, PlayerAnimations.RIFLE_FORWARD_WALK_1, PlayerAnimations.RIFLE_FORWARD_STILL, PlayerAnimations.RIFLE_FORWARD_WALK_2, PlayerAnimations.RIFLE_FORWARD_STILL);
+
+        thotAnimationSet = new AnimationSet();
+
+        thotAnimationSet.addSet("LEFT", ThotAnimations.LEFT_STILL, ThotAnimations.LEFT_WALK_1, ThotAnimations.LEFT_STILL, ThotAnimations.LEFT_WALK_2, ThotAnimations.LEFT_STILL);
+        thotAnimationSet.addSet("RIGHT", ThotAnimations.RIGHT_STILL, ThotAnimations.RIGHT_WALK_1, ThotAnimations.RIGHT_STILL, ThotAnimations.RIGHT_WALK_2, ThotAnimations.RIGHT_STILL);
+        thotAnimationSet.addSet("BACKWARD", ThotAnimations.BACKWARD_STILL, ThotAnimations.BACKWARD_WALK_1, ThotAnimations.BACKWARD_STILL, ThotAnimations.BACKWARD_WALK_2, ThotAnimations.BACKWARD_STILL);
+        thotAnimationSet.addSet("FORWARD", ThotAnimations.FORWARD_STILL, ThotAnimations.FORWARD_WALK_1, ThotAnimations.FORWARD_STILL, ThotAnimations.FORWARD_WALK_2, ThotAnimations.FORWARD_STILL);
 
         scopeRenderer = new ScopeRenderer(spriteSheet, this);
 
@@ -160,6 +182,7 @@ public class Game extends Canvas implements Runnable {
     public void tick() {
         tickCount++;
 
+        bulletManager.tickAll();
         entityManager.tickAll();
         scopeRenderer.tick();
     }
@@ -172,6 +195,8 @@ public class Game extends Canvas implements Runnable {
         }
 
         screen.render();
+
+        bulletManager.renderAll();
 
         entityManager.renderAll(screen);
 
@@ -223,11 +248,19 @@ public class Game extends Canvas implements Runnable {
         return animationSet;
     }
 
-    public static void main(String[] args) {
-        new Game().start();
+    public AnimationSet getThotAnimationSet() {
+        return thotAnimationSet;
     }
 
     public EntityTextureManager getEntityTextureManager() {
         return entityTextureManager;
+    }
+
+    public static void main(String[] args) {
+        new Game().start();
+    }
+
+    public BulletManager getBulletManager() {
+        return bulletManager;
     }
 }

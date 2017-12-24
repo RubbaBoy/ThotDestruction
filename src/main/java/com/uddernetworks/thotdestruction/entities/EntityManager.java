@@ -28,6 +28,17 @@ public class EntityManager {
         new ArrayList<>(entities).forEach(Entity::tick);
     }
 
+    public <T extends Mob> T entityIntersects(Class<T> type, int x, int y) {
+        for (Entity entity : entities) {
+            if (type.isInstance(entity)) {
+                Mob mob = (Mob) entity;
+                if (mob.intersects(x, y)) return type.cast(mob);
+            }
+        }
+
+        return null;
+    }
+
     public <T extends Entity> T entityWithin(Class<T> type, double distance, int x, int y) {
         double minDistance = -1;
         Entity minEntity = null;
@@ -36,6 +47,7 @@ public class EntityManager {
 
         for (Entity entity : entities) {
             if (type.isInstance(entity)) {
+//                double tempDistance = euclideanDistanceSquared(x, y, entity.getCenterX(), entity.getCenterY());
                 double tempDistance = euclideanDistanceSquared(x, y, entity.getX(), entity.getY());
                 if (tempDistance <= distance && (tempDistance < minDistance || minDistance == -1)) {
                     minDistance = tempDistance;

@@ -5,28 +5,41 @@ import java.awt.event.MouseListener;
 
 public class MouseHandler implements MouseListener {
 
+    private Game game;
+
+    public MouseHandler(Game game) {
+        this.game = game;
+
+        game.addMouseListener(this);
+    }
+
     @Override
-    public void mouseClicked(MouseEvent e) {
+    public void mouseClicked(MouseEvent event) {
 
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public void mousePressed(MouseEvent event) {
+        int x = event.getX() / 3;
+        int y = event.getY() / 3;
+
+        System.out.println("Clicked at (" + (x - game.getScreen().getXOffset()) + ", " + (y - game.getScreen().getXOffset()) + ")");
+
+        game.getPlayer().click(x, y);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent event) {
 
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseEntered(MouseEvent event) {
 
     }
 
     @Override
-    public void mouseEntered(MouseEvent e) {
-
-    }
-
-    @Override
-    public void mouseExited(MouseEvent e) {
+    public void mouseExited(MouseEvent event) {
 
     }
 }

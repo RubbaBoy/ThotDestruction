@@ -10,33 +10,64 @@ import com.uddernetworks.thotdestruction.main.Game;
 
 public class Mob extends Entity {
 
-    static final int FRONT = 2;
-    static final int BACK = 3;
-    static final int LEFT = 0;
-    static final int RIGHT = 1;
+    protected static final int FRONT = 2;
+    protected static final int BACK = 3;
+    protected static final int LEFT = 0;
+    protected static final int RIGHT = 1;
 
-    int speed = 1;
-    int x;
-    int y;
-    int lookingDirection = FRONT;
-    boolean isStill = false;
-    private long lastChange = 0;
-    long delay = 0;
+    protected int speed = 1;
+    protected double health;
+    protected double maxHealth;
+//    protected int x;
+//    protected int y;
+    protected int lookingDirection = FRONT;
+    protected boolean isStill = false;
+    protected long lastChange = 0;
+    protected long delay = 0;
     private int onIndex = 0;
     private AnimationEnum[] animations;
+    private AnimationSet animationSet;
     private AnimationEnum still;
-    Animation current;
-    int[][] pixels;
+    protected Animation current;
+    protected int[][] pixels;
 
-    public Mob(Game game, AnimationEnum still, AnimationEnum... animations) {
+    protected int xExact;
+    protected int yExact;
+
+    public Mob(Game game, int health, int maxHealth, AnimationSet animationSet, AnimationEnum still, AnimationEnum... animations) {
         super(game);
+        this.health = health;
+        this.maxHealth = maxHealth;
+        this.animationSet = animationSet;
         this.still = still;
         pixels = still.getAnimation().getPixels();
         current = still.getAnimation();
         this.animations = animations;
     }
 
-    void setInitialPosition(int x, int y) {
+    public void damage(int amount) {
+        health -= amount;
+    }
+
+    @Override
+    public int getCenterX() {
+        return x + pixels.length;
+    }
+
+    @Override
+    public int getCenterY() {
+        return y + pixels[0].length;
+    }
+
+    public double getHealth() {
+        return health;
+    }
+
+    public double getMaxHealth() {
+        return maxHealth;
+    }
+
+    protected void setInitialPosition(int x, int y) {
         this.x = x;
         this.y = y;
     }
@@ -66,7 +97,7 @@ public class Mob extends Entity {
         this.delay = delay;
 
         this.still = animationEnums[0];
-        this.animations = game.getAnimationSet().allButFirst(animationEnums);
+        this.animations = animationSet.allButFirst(animationEnums);
         onIndex = 0;
         lastChange = System.currentTimeMillis();
 
@@ -75,7 +106,7 @@ public class Mob extends Entity {
     }
 
     public void refreshAnimations(String[] currentAnimations) {
-        changeAnimationSet(delay, game.getAnimationSet().getSet(currentAnimations[lookingDirection]));
+        changeAnimationSet(delay, animationSet.getSet(currentAnimations[lookingDirection]));
     }
 
     public void changeAnimationSet(AnimationEnum animation) {
@@ -93,6 +124,11 @@ public class Mob extends Entity {
     @Override
     public void tick() {
         if (!alive) return;
+
+
+
+        this.xExact = x - game.getScreen().getXOffset();
+        this.yExact = y - game.getScreen().getYOffset();
 
         updateAnimation();
     }
@@ -123,6 +159,52 @@ public class Mob extends Entity {
         return this.y + (pixels[0].length / 2);
     }
 
+    public boolean intersects(int xPos, int yPos) {
+        int xMin = x + current.getBound_minX();
+        int xMax = x + current.getBound_maxX();
+
+        int yMin = y + current.getBound_minY();
+        int yMax = y + current.getBound_maxY();
+
+        return xMin < xPos && xMax > xPos && yMin < yPos && yMax > yPos;
+    }
+
+    protected boolean hasCollided(int newX, int newY) {
+        int xMin = current.getBound_minX();
+        int xMax = current.getBound_maxX();
+
+        int yMin = current.getBound_minY();
+        int yMax = current.getBound_maxY();
+
+
+        for (int x = xMin; x < xMax; x++) {
+            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, x + newX, newY + yMin)) {
+                return true;
+            }
+        }
+
+        for (int x = xMin; x < xMax; x++) {
+            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, x + newX, newY + yMax)) {
+                return true;
+            }
+        }
+
+
+        for (int y = yMin; y < yMax; y++) {
+            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, newX + xMin, y + newY)) {
+                return true;
+            }
+        }
+
+        for (int y = yMin; y < yMax; y++) {
+            if (isSolid(game.getScreen().xOffset, game.getScreen().yOffset, newX + xMax, y + newY)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private boolean isOutOfBounds(Screen screen, int x, int y) {
         if (this.x + x < 0 || this.y + y < 0) return true;
 
@@ -134,7 +216,7 @@ public class Mob extends Entity {
         return false;
     }
 
-    public boolean isSolid(double xOffset, double yOffset, int x, int y, int newX, int newY) {
+    public boolean isSolid(double xOffset, double yOffset, int newX, int newY) {
         if (game.getLevel().outOfBounds(newX - xOffset, newY - yOffset)) return true;
 
         Tile newTile = game.getLevel().getTileAt(new Double(newX - xOffset).intValue(), new Double(newY - yOffset).intValue());

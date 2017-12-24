@@ -40,9 +40,6 @@ public class PathFinder {
         findPath();
     }
 
-    // Start color: 255, 0, 0
-    // Path color:  255, 0, 255
-
     public void findPath() {
 
         int movedX = 0;
@@ -87,7 +84,6 @@ public class PathFinder {
                 yVals.add(y * 16 - i - 16);
             }
         }
-
 
         findPath();
     }

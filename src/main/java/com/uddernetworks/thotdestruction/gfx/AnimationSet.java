@@ -7,8 +7,8 @@ public class AnimationSet {
 
     private Map<String, AnimationEnum[]> animationMap = new HashMap<>();
 
-    public AnimationSet(SpriteSheet spriteSheet) {
-        PlayerAnimations.populateValues(spriteSheet);
+    public AnimationSet() {
+
     }
 
     public void addSet(String name, AnimationEnum... animations) {

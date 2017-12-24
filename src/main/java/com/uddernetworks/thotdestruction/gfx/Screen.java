@@ -43,7 +43,8 @@ public class Screen {
 
     private Color transparent = new Color(0, 0, 0, 0);
     public void setRGB(int x, int y, int rgb) {
-        if (new Color(rgb, true).equals(transparent)) return;
+//        if (new Color(rgb, true).equals(transparent)) return;
+        if (new Color(rgb, true).getAlpha() == 0) return;
 
         if (x < 0 || x >= image.getWidth()) return;
         if (y < 0 || y >= image.getHeight()) return;

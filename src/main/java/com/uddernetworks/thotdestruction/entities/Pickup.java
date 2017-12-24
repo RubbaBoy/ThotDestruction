@@ -48,4 +48,14 @@ public class Pickup extends Entity {
         game.getEntityManager().remove(this);
         alive = false;
     }
+
+    @Override
+    public int getCenterX() {
+        return this.x + pixels.length;
+    }
+
+    @Override
+    public int getCenterY() {
+        return this.x + pixels[0].length;
+    }
 }
