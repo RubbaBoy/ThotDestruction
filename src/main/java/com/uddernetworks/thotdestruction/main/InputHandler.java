@@ -1,5 +1,7 @@
 package com.uddernetworks.thotdestruction.main;
 
+import com.uddernetworks.thotdestruction.entities.thot.TrackingThot;
+
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 

@@ -35,7 +35,7 @@ public class Player extends Mob {
 
     public void click(int xx, int yy) {
         if (game.getInputHandler().shift.isPressed() && equipped != null) {
-            BasicBullet bullet = new BasicBullet(game, Math.abs(xExact) + (pixels.length / 2), Math.abs(yExact) + (pixels[0].length / 2), xx + Math.abs(game.getScreen().getXOffset()), yy + Math.abs(game.getScreen().getYOffset()));
+            BasicBullet bullet = new BasicBullet(game, new Double(Math.abs(xExact) + (pixels.length / 2)).intValue(), new Double(Math.abs(yExact) + (pixels[0].length / 2)).intValue(), xx + Math.abs(game.getScreen().getXOffset()), yy + Math.abs(game.getScreen().getYOffset()));
             game.getBulletManager().addBullet(bullet);
         }
     }

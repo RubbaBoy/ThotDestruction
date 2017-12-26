@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class PathFinder {
+public class PathFindingThot {
 
     private int x;
     private int y;
@@ -19,7 +19,7 @@ public class PathFinder {
 
     private int pathColor;
 
-    public PathFinder(BufferedImage image, int xPos, int yPos) {
+    public PathFindingThot(BufferedImage image, int xPos, int yPos) {
         this.x = xPos;
         this.y = yPos;
 

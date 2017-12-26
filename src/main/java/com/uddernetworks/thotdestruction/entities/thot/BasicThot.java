@@ -15,17 +15,29 @@ public class BasicThot extends Mob implements Thot {
 //    private int[][] pixels;
 
     private static final int ANIMATION_DELAY = 150;
-    private static final int speed = 1;
-    private int incrementAmount = speed;
-    private int pathIndex = 0;
-    private List<Integer> xPath;
-    private List<Integer> yPath;
+    protected static final int speed = 1;
+    private final boolean movesInPath;
+    private final boolean backAndForth;
+    protected int incrementAmount = speed;
+    int pathIndex = 0;
+    List<Integer> xPath = new ArrayList<>();
+    List<Integer> yPath = new ArrayList<>();
     private DisplayHealth displayHealth;
 
     private String[] currentAnimations = {"LEFT", "RIGHT", "BACKWARD", "FORWARD"};
 
     public BasicThot(Game game, int x, int y) {
+        this(game, true, x, y);
+    }
+
+    public BasicThot(Game game, boolean movesInPath, int x, int y) {
+        this(game, movesInPath, x, y, true);
+    }
+
+    public BasicThot(Game game, boolean movesInPath, int x, int y, boolean backAndForth) {
         super(game, 10, 10, game.getThotAnimationSet(), ThotAnimations.FORWARD_STILL);
+        this.movesInPath = movesInPath;
+        this.backAndForth = backAndForth;
 
         System.out.println("Initial position (" + x + ", " + y + ")");
 
@@ -51,39 +63,53 @@ public class BasicThot extends Mob implements Thot {
             return;
         }
 
-//        if (tickCount % 2 != 0) return;
+//        if (xPath.size() != 0 && (pathIndex < xPath.size() && pathIndex > 0)) {
+        if (xPath.size() != 0 && (pathIndex < xPath.size() && pathIndex >= 0)) {
 
-        int oldX = x;
-        int oldY = y;
+//        if (tickCount % 10 != 0) return;
 
-        x = xPath.get(pathIndex);
-        y = yPath.get(pathIndex);
+            int oldX = x;
+            int oldY = y;
 
-        pathIndex += incrementAmount;
-        if (pathIndex >= xPath.size() || pathIndex < 0) {
-            incrementAmount *= -1;
+            x = xPath.get(pathIndex);
+            y = yPath.get(pathIndex);
+
+            this.xExact = x - game.getScreen().getXOffset();
+            this.yExact = y - game.getScreen().getYOffset();
+
             pathIndex += incrementAmount;
-        }
+            if (pathIndex >= xPath.size() || pathIndex < 0) {
+                pathIndex -= incrementAmount;
+//                if (!backAndForth) {
+//                    super.tick();
+//                    displayHealth.tick();
+//                    return;
+//                }
+//
+//                incrementAmount *= -1;
+//                pathIndex += incrementAmount;
+            }
 
-        if (x < oldX) {
-            if (lookingDirection != LEFT) {
-                changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[0]));
-                lookingDirection = LEFT;
-            }
-        } else if (x > oldX) {
-            if (lookingDirection != RIGHT) {
-                changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[1]));
-                lookingDirection = RIGHT;
-            }
-        } else if (y < oldY) {
-            if (lookingDirection != BACK) {
-                changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[2]));
-                lookingDirection = BACK;
-            }
-        } else if (y > oldY) {
-            if (lookingDirection != FRONT) {
-                changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[3]));
-                lookingDirection = FRONT;
+            if (x < oldX) {
+                if (lookingDirection != LEFT) {
+                    changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[0]));
+                    lookingDirection = LEFT;
+                }
+            } else if (x > oldX) {
+                if (lookingDirection != RIGHT) {
+                    changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[1]));
+                    lookingDirection = RIGHT;
+                }
+            } else if (y < oldY) {
+                if (lookingDirection != BACK) {
+                    changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[2]));
+                    lookingDirection = BACK;
+                }
+            } else if (y > oldY) {
+                if (lookingDirection != FRONT) {
+                    changeAnimationSet(ANIMATION_DELAY, game.getThotAnimationSet().getSet(currentAnimations[3]));
+                    lookingDirection = FRONT;
+                }
             }
         }
 

@@ -2,7 +2,8 @@ package com.uddernetworks.thotdestruction.level;
 
 import com.uddernetworks.thotdestruction.entities.ThotRiflePickup;
 import com.uddernetworks.thotdestruction.entities.thot.BasicThot;
-import com.uddernetworks.thotdestruction.entities.thot.PathFinder;
+import com.uddernetworks.thotdestruction.entities.thot.PathFindingThot;
+import com.uddernetworks.thotdestruction.entities.thot.TrackingThot;
 import com.uddernetworks.thotdestruction.level.tile.Tile;
 import com.uddernetworks.thotdestruction.level.tile.TileUtils;
 import com.uddernetworks.thotdestruction.main.Game;
@@ -11,8 +12,6 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class Level {
 
@@ -54,14 +53,20 @@ public class Level {
                     game.getEntityManager().add(new ThotRiflePickup(game, x * 16, y * 16));
                 } else if (color.getRed() == 255 && color.getGreen() == 0 && color.getBlue() == 0) {
 
-                    System.out.println("Spawning THOT");
+                    System.out.println("Spawning Basic Thot");
 
-                    PathFinder pathFinder = new PathFinder(entityImage, x, y);
+                    PathFindingThot pathFinder = new PathFindingThot(entityImage, x, y);
                     BasicThot basicThot = new BasicThot(game, x * 16, y * 16);
 
                     basicThot.setPath(pathFinder.getXVals(), pathFinder.getYVals());
 
                     game.getEntityManager().add(basicThot);
+                } else if (color.getRed() == 0 && color.getGreen() == 0 && color.getBlue() == 255) {
+                    System.out.println("Spawning tracking thot!");
+
+                    TrackingThot trackingThot = new TrackingThot(game, x * 16, y * 16);
+
+                    game.getEntityManager().add(trackingThot);
                 }
             }
         }
@@ -105,7 +110,6 @@ public class Level {
                         int writeImageY = yOffset + (yTile * 16) + subY;
 
                         if (writeImageX >= 0 && writeImageX < image.getWidth() && writeImageY >= 0 && writeImageY < image.getHeight()) {
-
                             image.setRGB(writeImageX, writeImageY, currTile.getColors()[subX][subY]);
                         }
                     }

@@ -31,8 +31,8 @@ public class Mob extends Entity {
     protected Animation current;
     protected int[][] pixels;
 
-    protected int xExact;
-    protected int yExact;
+    public int xExact;
+    public int yExact;
 
     public Mob(Game game, int health, int maxHealth, AnimationSet animationSet, AnimationEnum still, AnimationEnum... animations) {
         super(game);
@@ -70,6 +70,9 @@ public class Mob extends Entity {
     protected void setInitialPosition(int x, int y) {
         this.x = x;
         this.y = y;
+
+        this.xExact = this.x;
+        this.yExact = this.y;
     }
 
     private void updateAnimation() {
@@ -124,8 +127,6 @@ public class Mob extends Entity {
     @Override
     public void tick() {
         if (!alive) return;
-
-
 
         this.xExact = x - game.getScreen().getXOffset();
         this.yExact = y - game.getScreen().getYOffset();
